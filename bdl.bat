@@ -31,7 +31,7 @@ COLOR 1B
 
 
 SET "VER=0.4.0"
-SET "VERSION=0.4.0-161220"
+SET "VERSION=0.4.0-211220"
 
 
 IF /I "%~1"=="PopOut" (
@@ -55,6 +55,8 @@ IF /I "%~1"=="QuickDownload" (
 	PAUSE >NUL
 	SET "ParametricDownloadSwitch=EXIT"
 )
+
+CALL :SplishSplashSplosh
 
 :MAIN
 CLS
@@ -80,11 +82,11 @@ REM // Websites with dash-video can't be handeled with batch.
 SET "Redlist=pornhub youporn zdf nrk"
 
 
-REM CALL :StatusViaTitle test EnclosureA test test
+REM CALL :StatusViaTitle test EnclosureA test test /// TODO Finish this module
 IF NOT DEFINED FirstStart CALL :InitVars
 IF NOT DEFINED FirstStart CALL :DoesWorkspaceExist
 IF DEFINED FirstStart CALL :GenerateSessionToken
-CALL :SplishSplashSplosh
+REM CALL :SplishSplashSplosh
 CALL :UserInput
 :TryAgain
 CALL :SanitiseUserInput
@@ -152,6 +154,7 @@ SET "REMF=REM "
 CALL :SanitiseUserInput
 CALL :AnalyseInput
 CALL :BuildURL
+ECHO.
 ECHO.::: URLDepthLevel and Dissection
 ECHO.:::
 ECHO.::: http: // www . example . com / page . php?parameter=loremipsum
@@ -159,24 +162,32 @@ ECHO.:::   0   ^|           1          ^|            2                    [URLDe
 ECHO.:::       ^|   0  ^|    1    ^|  2  ^|  0   ^|          1             ^| [Dissection:Delimiter{.}]
 ECHO.Delimiter 1: / ^| Delimiter 2: . ^| Custom Identifier: !CustomIdentifier! ^| URL Depth Level: !URLDepthLevel!
 ECHO.Service Name: !ServiceName!
+ECHO.
 ECHO.--[URLDepthLevel_and_Dissection]-----
 FOR /L %%A IN (0,1,8) DO (
+	SET /A UX2=%%A+1
 	IF DEFINED URL%%A (
 		SET "TMPY=%%A"
-		ECHO.  URL%%A=!URL%%A!
+		ECHO.  URL%%A=		!URL%%A!
 		FOR /L %%B IN (0,1,8) DO (
 			SET "TMPXZ=URL!TMPY!%%BA"
 		 	IF DEFINED URL!TMPY!%%BA (
 				FOR %%# in (!TMPXZ!) DO (
-					ECHO.     %%#=!%%#!
+					ECHO.     %%#=	!%%#!
 				)
 		 	)
-		 )
+		)
+		IF DEFINED URL!UX2! (
+			ECHO.--
+		) ELSE (
+			ECHO.-------
+		)
 	)
 )
-ECHO.-------
-ECHO.DeBug: !VarIn! !VarOut! !%VarIn%! !%VarOut%! !Delimiter!
-ECHO.%VarOut%1%CustomIdentifier% !%VarOut%1%CustomIdentifier%! !%VarOut%DepthLevel! !CustomIdentifier!
+ECHO.
+REM ECHO.DeBug: !VarIn! !VarOut! !%VarIn%! !%VarOut%! !Delimiter!
+REM ECHO.%VarOut%1%CustomIdentifier% !%VarOut%1%CustomIdentifier%! !%VarOut%DepthLevel! !CustomIdentifier!
+REM CALL :CheckWebsiteConnect
 ECHO.End of MakeMode
 ECHO.Do you want to continue to the Download Module? (y/N) -^> [:Realm_!ServiceName!]
 CHOICE /C YN >NUL
@@ -919,7 +930,7 @@ SET "CurrentRealm=eroxia"
 TITLE b.dl - Downloading from eroxia!CL_Codebase!
 REM // https://www.eroxia.com/video/xxx-xxxxxxx-xxxxxxxx-xxx-xxx-xxx-xxx-xxx-xxxxx-nnnnnn.html
 REM // https://www.eroxia.com/embed/nnnnnn
-REM Check is link is already embed, then skip to downloading since video clear link is on embed page
+REM Check if link is already embed, then skip to downloading since video clear link is on embed page
 IF EXIST "!SELFDropTemp!temp.mp4" (
 	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
 )
@@ -1002,7 +1013,7 @@ EXIT /B
 SET "CurrentRealm=xvideos"
 REM // https://www.xvideos.com/videonnnnnnnn/lil_d_wird_beim_ficken_von_valerie_kay_auf_dem_balkon_erwischt
 REM // https://www.xvideos.com/embedframe/nnnnnnnn
-REM Check is link is already embed, then skip to downloading since video clear link is on embed page
+REM Check if link is already embed, then skip to downloading since video clear link is on embed page
 IF EXIST "!SELFDropTemp!temp.mp4" (
 	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
 )
@@ -1181,7 +1192,7 @@ SET "CurrentRealm=xhamster"
 TITLE b.dl - Downloading from xhamster!CL_Codebase!
 REM // https://geocode.xhamster.com/videos/xx-xxxxx-xxxxx-xxxx-xxxxx-x-xxx-xxxxxx-xxx-nnnnnnn
 REM // https://geocode.xhamster.com/embed/nnnnnnn
-REM Check is link is already embed, then skip to downloading since video clear link is on embed page
+REM Check if link is already embed, then skip to downloading since video clear link is on embed page
 IF EXIST "!SELFDropTemp!temp.mp4" (
 	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
 )
@@ -1234,6 +1245,65 @@ EXIT /B
 
 
 ::: ---
+
+
+
+:TODO
+
+:Realm_hclips
+
+:::Currently broken
+
+EXIT /B
+SET "CurrentRealm=hclips"
+TITLE b.dl - Downloading from hclips!CL_Codebase!
+REM // https://hclips.com/videos/nnnnnnn/beautiful-blonde-riding-xx-xxx-xxxx-xx-xxxxxxxxx/
+REM // https://hclips.com/embed/nnnnnnn/
+REM Check if link is already embed, then skip to downloading since video clear link is on embed page
+
+IF EXIST "!SELFDropTemp!temp.mp4" (
+	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
+)
+IF EXIST "!SELFDropTemp!temp.html" (
+	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
+)
+
+IF "!URL2!"=="embed" (
+	ECHO.[!CurrentRealm!] Link type: [!URL2!]
+	SET "EmbedURL=!BuiltURL!"
+	SET "FileName=HCLIPS-!URL3!"
+	GOTO :hclips_DL_Webpage
+)
+
+REM Get video code
+ECHO.[!CurrentRealm!] Link type: [video]
+SET "VideoID=!URL3!"
+SET "FileName=HCLIPS-!URL4!!URL3!"
+IF DEFINED VideoID (
+	ECHO.[!CurrentRealm!] Got VideoID.
+)
+SET "EmbedURL=https://!URL1!/embed/!VideoID!"
+:hclips_DL_Webpage
+SET "CurrentRealm=hclips"
+ECHO.[!CurrentRealm!] Downloading webpage...
+CALL :JavascriptDownload "!EmbedURL!" "!SELFDropTemp!temp.html"
+ECHO.[!CurrentRealm!] Parsing webpage...
+FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlLow" ') DO (
+	SET "SourceLineLow=%%A"
+)
+FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlHigh" ') DO (
+	SET "SourceLineHigh=%%A"
+)
+FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setUploaderName" ') DO (
+	SET "UploaderID=%%A"
+)
+FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbSlide" ') DO (
+	SET "ThumbnailMosaique=%%A"
+)
+FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbUrl" ') DO (
+	SET "Thumbnail=%%A"
+	GOTO :hclips_DL_ManageDownloadVars
+)
 
 :::Realm ideas to check out: imgur erome motherless porn.com redtube heavyr eporner shameless youjizz
 
