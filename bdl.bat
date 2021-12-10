@@ -13,7 +13,7 @@ COLOR 1B
 :::    /// ::::: /// :[b.dl]: /// ::::: /// :::
 :::      A pure batch download manager script
 :::      only using the given windows utils.
-:::      Many fallback Options are available.
+:::      Many fallback options are available.
 :::
 :::        ·   ·▐ ▄ ▄▄▄ .▄▄▄  ·▄▄▄▄▪  ·  ▪
 :::          · •█▌▐█▀▄.▀·▀▄ █·██▪ ██   .
@@ -30,15 +30,16 @@ COLOR 1B
 :::    /// ::: /// ::: /// ::: /// ::: /// :::
 
 
-SET "VER=0.4.0"
-SET "VERSION=0.4.0-211220"
+SET "VER=0.5.0"
+SET "VERSION=0.5.0-211210"
 
 
 IF /I "%~1"=="PopOut" (
 	SETLOCAL EnableDelayedExpansion
 	ECHO.Starting up...
 	SET "BitsAdminSession=%~2"
-	TITLE b.dl -[!BitsAdminSession!]- Download PopOut
+	SET "FilenameInTitle= // %~5"
+	TITLE b.dl -[!BitsAdminSession!]- Download PopOut!FilenameInTitle!
 	SET "RemoteURL=%~3"
 	SET "LocalURL=%~4"
 	MODE 70,8
@@ -56,37 +57,42 @@ IF /I "%~1"=="QuickDownload" (
 	SET "ParametricDownloadSwitch=EXIT"
 )
 
-CALL :SplishSplashSplosh
-
 :MAIN
 CLS
 
 
 ::USER:SETTINGS:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
-SET "CL_MakeMode=0"				::: Special mode for development of realms and modules	1/on 0/off
-SET "CL_DisplayCodebase=1"		::: Display codebase versions in the title				1/on 0/off
-SET "CL_ForgetUserInput=1"		::: Reset user input after download						1/on 0/off
-SET "CL_DupeDetectLogging=1"	::: Log session for duplicate detection					1/on 0/off
+SET "CL_MakeMode=0"				 ::: Special mode for development of realms and modules	1/on 0/off
+SET "CL_DisplayCodebase=1"		 ::: Display codebase versions in the title				1/on 0/off
+SET "CL_DisplayHeader=1"		 ::: Display header										1/on 0/off
+SET "CL_ForgetUserInput=1"		 ::: Reset user input after download					1/on 0/off
+SET "CL_DupeDetectLogging=1"	 ::: Log session for duplicate detection				1/on 0/off
+SET "CL_ThirdPartyDownloader=yt-dlp.exe" ::: Third party command line downloader tool filename
+SET "CL_ThirdPartyDownloaderName=yt-dlp" ::: Name of the third party tool for UI reasons
+SET "DS_ThirdPartyDownloaderDownloadGithub=https://github.com/yt-dlp/yt-dlp/releases/download/2021.12.01/yt-dlp.exe"
+SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
 :::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-REM // Supported services
-SET "Modules1=eroxia xvideos xnxx"
+REM ///Supported services/////////
+SET "Modules1=eroxia xvideos xnxx direct_download"
 SET "Modules2="
 SET "Modules3="
 SET "Modules4="
 SET "Modules5="
-REM // Websites with dash-video can't be handeled with batch.
-SET "Redlist=pornhub youporn zdf nrk"
+REM //////////////////////////////
 
+REM ///Websites with dash-video can't be handeled with batch./////////
+SET "Redlist=pornhub youporn zdf nrk"
+REM //////////////////////////////////////////////////////////////////
 
 REM CALL :StatusViaTitle test EnclosureA test test /// TODO Finish this module
 IF NOT DEFINED FirstStart CALL :InitVars
 IF NOT DEFINED FirstStart CALL :DoesWorkspaceExist
 IF DEFINED FirstStart CALL :GenerateSessionToken
-REM CALL :SplishSplashSplosh
+IF NOT "!CL_DisplayHeader!"=="0" CALL :SplishSplashSplosh
 CALL :UserInput
 :TryAgain
 CALL :SanitiseUserInput
@@ -102,7 +108,7 @@ IF "!ServiceSupported2!"=="true" (
 	CALL :FindRealm
 )
 REM IF !ServiceSupported! EQU 1 CALL :FileCheck DownloadTry1
-CALL :YoutubeDLFallback
+CALL :ThirdPartyDownloaderFallback
 REM CALL :FileCheck DownloadTry2
 TIMEOUT /T 1 >NUL
 GOTO :MAIN
@@ -127,14 +133,14 @@ SET "SELF=%~dp0"
 SET "SELFEXT=%~dpnx0"
 SET "SELFDropFolder=!SELF!Downloads\"
 SET "SELFDropTemp=!SELFDropFolder!Temp\"
-SET "YoutubeDL-X=!SELFDropFolder!Temp\youtube-dl.exe"
+SET "ThirdPartyDownload=!SELFDropFolder!Temp\!CL_ThirdPartyDownloader!"
 CALL :DoesWorkspaceExist
-IF EXIST "!SELFDropTemp!youtube-dl.exe" (
-	FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-  	SET "YoutubeDLInitVer=%%A"
+IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+	FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+  	SET "ThirdPartyDownloaderInitVer=%%A"
 	)
 ) ELSE (
-	SET "YoutubeDLInitVer=unknown"
+	SET "ThirdPartyDownloaderInitVer=unknown"
 )
 IF NOT !CL_MakeMode! EQU 0 (
 	GOTO :MakeModeInit
@@ -148,7 +154,7 @@ SET "BdlSessionToken=MKMD"
 SET "ZZZ=0"
 SET "MakeModeInterrupt=MakeMode activated^!"
 CALL :DoesWorkspaceExist
-CALL :SplishSplashSplosh
+IF NOT CALL :SplishSplashSplosh
 CALL :UserInput
 SET "REMF=REM "
 CALL :SanitiseUserInput
@@ -187,7 +193,7 @@ FOR /L %%A IN (0,1,8) DO (
 ECHO.
 REM ECHO.DeBug: !VarIn! !VarOut! !%VarIn%! !%VarOut%! !Delimiter!
 REM ECHO.%VarOut%1%CustomIdentifier% !%VarOut%1%CustomIdentifier%! !%VarOut%DepthLevel! !CustomIdentifier!
-REM CALL :CheckWebsiteConnect
+REM CALL :CheckWebsiteConnect /// TODO Finish this module
 ECHO.End of MakeMode
 ECHO.Do you want to continue to the Download Module? (y/N) -^> [:Realm_!ServiceName!]
 CHOICE /C YN >NUL
@@ -255,7 +261,7 @@ EXIT /B
 
 :UserInput
 IF "!CL_DisplayCodebase!"=="1" (
-	SET "CL_Codebase=   ///   [bdl: !VERSION!; youtubedl: !YoutubeDLInitVer!]"
+	SET "CL_Codebase=   ///   [bdl: !VERSION!; !CL_ThirdPartyDownloaderName!: !ThirdPartyDownloaderInitVer!]"
 ) ELSE (
 	SET "CL_Codebase= "
 )
@@ -273,21 +279,22 @@ EXIT /B
 
 
 :SanitiseUserInput
-SET "HELPSTR=h /h -h /help -help --help help"
-SET "TESTSTR=t /t -t /test -test test_all test_all_components"
-SET "TESTSTRDL=tdm /tdm -tdm test_download_modules"
-SET "UPDATESTR=u /u -u upd -upd /upd update"
-SET "EXITSTR=q x exit quit"
+SET "HELPSTR=h -h /h --h hlp -hlp /hlp --hlp help -help /help --help"
+SET "TESTSTR=t -t /t --t test -test /test --test test_all -test_all /test_all --test_all test_all_components -test_all_components /test_all_components --test_all_components"
+SET "TESTSTRDL=td -td /td --td tdm -tdm /tdm --tdm test_download_modules -test_download_modules /test_download_modules --test_download_modules"
+SET "UPDATESTR=u -u /u --u upd -upd /upd --upd update -update /update --update"
+SET "MKMDSTR=m -m /m --m mkm -mkm /mkm --mkm mkmd -mkmd /mkmd --mkmd makemode -makemode /makemode --makemode"
+SET "EXITSTR=q -q /q --q x -x /x --x exit -exit /exit --exit quit -quit /quit --quit"
 FOR %%A IN (!EXITSTR!) DO (
     IF /i "!URL!"=="%%A" (
 		ECHO.
 		ECHO. Cleaning up...
 		ECHO.
-		ECHO.   ^>^>^> Temporary Files
+		ECHO.  ^>^>^> Temporary Files
 		CALL :CL_CleanRoutine
-		ECHO.   ^>^>^> EXITING
-		REM PAUSE
+		ECHO.  ^>^>^> EXITING
 		TIMEOUT /T 1 >NUL
+		CLS
 		EXIT
 	)
 )
@@ -296,10 +303,10 @@ FOR %%A IN (!HELPSTR!) DO (
 		ECHO. b.dl - [!HELPSTR!]
 		ECHO.	Usage: Put website link to download content into window.
 		ECHO.	Currently Supported Services: !SupportedServices!
-		ECHO.	The following services require Youtube-DL: !RedList!
+		ECHO.	The following services require !CL_ThirdPartyDownloaderName!: !RedList!
 		ECHO.
 		ECHO. Available Commands:
-		ECHO.	Update YoutubeDL: 			u /u -u upd -upd /upd update
+		ECHO.	Update !CL_ThirdPartyDownloaderName!: 			u /u -u upd -upd /upd update
 		ECHO.	Test installed download modules: 	tdm /tdm -tdm test_download_modules
 		ECHO.	Test all modules:			t /t -t /test -test test_all test_all_components
 		ECHO.	This help document:			h /h -h /help -help --help help
@@ -334,52 +341,53 @@ FOR %%A IN (!TESTSTRDL!) DO (
 )
 FOR %%A IN (!UPDATESTR!) DO (
     IF /i "!URL!"=="%%A" (
-		IF DEFINED YoutubeDLUpdatedVer (
-			ECHO. b.dl - [update ytdl base]
-			ECHO.
-			ECHO. YoutubeDL is up to date.
-			IF EXIST "!SELFDropTemp!youtube-dl.exe" (
-				FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-			  	SET "YoutubeDLInitVer=%%A"
+		IF DEFINED ThirdPartyDownloaderUpdatedVer (
+			ECHO. b.dl - [update !CL_ThirdPartyDownloaderName! base]
+			ECHO. 
+			ECHO. You are running !CL_ThirdPartyDownloaderName! Version: !ThirdPartyDownloaderUpdatedVer!
+			ECHO. !CL_ThirdPartyDownloaderName! is up to date.
+			IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+				FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+			  	SET "ThirdPartyDownloaderInitVer=%%A"
 				)
 			) ELSE (
-				SET "YoutubeDLInitVer=unknown"
+				SET "ThirdPartyDownloaderInitVer=unknown"
 			)
 			ECHO. Press Any [Key] to continue.
-			PAUSE >NUL
+			TIMEOUT /T 2 >NUL
 			GOTO :MAIN
 		)
-		IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
-			ECHO. b.dl - [update ytdl base]
+		IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+			ECHO. b.dl - [update !CL_ThirdPartyDownloaderName! base]
 			ECHO.
-			ECHO. Can't check YoutubeDL for updates if it does not exist. Brain.
+			ECHO. Can't check !CL_ThirdPartyDownloaderName! for updates if it does not exist.
 			ECHO. Trying to download from repository...
-			CALL :YoutubeDLFallbackInitialStart
-			CALL :CheckYoutubeDLForUpdates
-			IF EXIST "!SELFDropTemp!youtube-dl.exe" (
-				FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-			  	SET "YoutubeDLInitVer=%%A"
+			CALL :ThirdPartyDownloaderFallbackInitialStart
+			CALL :CheckThirdPartyDownloaderForUpdates
+			IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+				FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+			  	SET "ThirdPartyDownloaderInitVer=%%A"
 				)
 			) ELSE (
-				SET "YoutubeDLInitVer=unknown"
+				SET "ThirdPartyDownloaderInitVer=unknown"
 			)
 			ECHO. Press Any [Key] to continue.
-			PAUSE >NUL
+			TIMEOUT /T 2 >NUL
 			GOTO :MAIN
 			EXIT /B
 		)
-		ECHO. b.dl - [update ytdl base]
+		ECHO. b.dl - [update !CL_ThirdPartyDownloaderName! base]
 		ECHO.
-		CALL :CheckYoutubeDLForUpdates
-		IF EXIST "!SELFDropTemp!youtube-dl.exe" (
-			FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-		  	SET "YoutubeDLInitVer=%%A"
+		CALL :CheckThirdPartyDownloaderForUpdates
+		IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+			FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+		  	SET "ThirdPartyDownloaderInitVer=%%A"
 			)
 		) ELSE (
-			SET "YoutubeDLInitVer=unknown"
+			SET "ThirdPartyDownloaderInitVer=unknown"
 		)
 		ECHO. Press Any [Key] to continue.
-		PAUSE >NUL
+		TIMEOUT /T 2 >NUL
 		GOTO :MAIN
 		EXIT /B
 	)
@@ -405,7 +413,10 @@ CALL :KillUnallowedCharacters URL URL
 ::: http: // www . example . com / page . php?parameter=loremipsum
 :::   0   |           1          |            2                    [URLDepthLevel]
 :::       |   0  |    1    |  2  |  0   |          1             | [Dissection:Delimiter{.}]
-SET URLDepthLevel=0
+
+REM Really bad workaround to a direct download related issue below, will fix later
+SET URLDepthLevel=-1
+
 FOR /F "tokens=1,2,3,4,5,6,7,8,9 delims=/" %%A IN ("!URL!") DO (
   SET "URL0=%%A"
   IF DEFINED URL0 (
@@ -538,6 +549,32 @@ FOR /L %%A in (0,1,!URLDepthLevel!) DO (
   CALL :DissectURL URL%%A URL%%A . A
 )
 CALL :DissectionURLAnalysis
+CALL :DetectDirectDownload
+EXIT /B
+
+
+
+:DetectDirectDownload
+FOR /L %%A IN (1,1,8) DO (
+	IF DEFINED URL%%A (
+		IF "!URL%%A:~-4!"==".mp4" (
+			SET "DDLFlag=1"
+		)
+	)
+)
+IF "!DDLFlag!"=="1" (
+	ECHO.
+	ECHO.DetectDDL.[!URL!]
+	ECHO.
+	ECHO. The provided URL might be a direct link to a file.
+	ECHO. Do you want to provide an alternative filename?
+	ECHO. Leave blank if not.
+	ECHO.
+	SET /P "TPDCustomFileName=Alternative Filename (.mp4 is automatically appended)>"
+	IF NOT "!TPDCustomFileName!"=="" ( SET "TPDCustomFileName=!TPDCustomFileName!.mp4" ) ELSE ( SET "TPDCustomFileName=!URL%URLDepthLevel%!" )
+	ECHO.
+	GOTO :Realm_direct_download
+)
 EXIT /B
 
 
@@ -551,48 +588,46 @@ REM ECHO.DeBug: !VarIn! !VarOut! !%VarIn%! !%VarOut%!
 EXIT /B
 
 REM TODO Rewrite download module to feature clean design and progress bar.
-:YoutubeDLFallbackInitialStart
-SET "YoutubeDLDownloadGithub=https://github.com/ytdl-org/youtube-dl/releases/download/2020.07.28/youtube-dl.exe"
-SET "YoutubeDLDownloadGithubAlternateVersion=https://github.com/ytdl-org/youtube-dl/releases/download/2020.06.16/youtube-dl.exe"
-ECHO.Downloading YoutubeDL... Try1
-CALL :BitsadminDownload "YTDL" "!YoutubeDLDownloadGithub!" "!SELFDropTemp!youtube-dl.exe"
-IF NOT %BitsadminDLMErrorlevel% EQU 0 (
+:ThirdPartyDownloaderFallbackInitialStart
+ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try1
+CALL :PowershellDownload "!DS_ThirdPartyDownloaderDownloadGithub!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
+IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
   ECHO./^^!\ There was some kind of error during the download.
   ECHO.Trying again with another version.
-  IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
-    ECHO.Downloading YoutubeDL... Try2
-    CALL :BitsadminDownload "YTDL2T" "!YoutubeDLDownloadGithubAlternateVersion!" "!SELFDropTemp!youtube-dl.exe"
-    IF NOT %BitsadminDLMErrorlevel% EQU 0 (
-      ECHO./^^!\ There was some kind of error during the download of YoutubeDL.
-      ECHO.Trying again with another method.
-      ECHO.Downloading YoutubeDL... Try3
-      CALL :JavascriptDownload "!YoutubeDLDownloadGithub!" "!SELFDropTemp!youtube-dl.exe"
-      IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
+  IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+    ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try2
+	CALL :JavascriptDownload "!DS_ThirdPartyDownloaderDownloadGithubAlternateVersion!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
+    IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+      ECHO./^^!\ There was some kind of error during the download of !CL_ThirdPartyDownloaderName!.
+      ECHO.Trying again with another download method.
+      ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try3
+      CALL :BitsadminDownload "TPDL" "!DS_ThirdPartyDownloaderDownloadGithub!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
+	  IF NOT !BitsadminDLMErrorlevel! EQU 0 (
         ECHO./^^!\ There was some kind of error during the download.
         ECHO.Trying again with another version.
-        ECHO.Downloading YoutubeDL... Try4
-        CALL :JavascriptDownload "!YoutubeDLDownloadGithubAlternateVersion!" "!SELFDropTemp!youtube-dl.exe"
-        IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
-          ECHO./^^!\ There was some kind of error during the download of YoutubeDL.
-          ECHO.Trying again with another method.
-          ECHO.Downloading YoutubeDL... Try5
-          CALL :PowershellDownload "!YoutubeDLDownloadGithub!" "!SELFDropTemp!youtube-dl.exe"
-          IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
+        ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try4
+        CALL :BitsadminDownload "TPDL2T" "!DS_ThirdPartyDownloaderDownloadGithubAlternateVersion!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
+		IF NOT !BitsadminDLMErrorlevel! EQU 0 (
+          ECHO./^^!\ There was some kind of error during the download of !CL_ThirdPartyDownloaderName!.
+          ECHO.Trying again with another download method.
+          ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try5
+          CALL :JavascriptDownload "!DS_ThirdPartyDownloaderDownloadGithub!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
+          IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
             ECHO./^^!\ There was some kind of error during the download.
             ECHO.Trying again with another version.
-            ECHO.Downloading YoutubeDL... Try6
-            CALL :PowershellDownload "!YoutubeDLDownloadGithubAlternateVersion!" "!SELFDropTemp!youtube-dl.exe"
+            ECHO.Downloading !CL_ThirdPartyDownloaderName!... Try6
+            CALL :PowershellDownload "!DS_ThirdPartyDownloaderDownloadGithubAlternateVersion!" "!SELFDropTemp!!CL_ThirdPartyDownloader!"
           )
         )
       )
     )
   )
 )
-IF EXIST "!SELFDropTemp!youtube-dl.exe" (
-  ECHO.Successfully downloaded YoutubeDL.
+IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+	ECHO.Successfully downloaded !CL_ThirdPartyDownloaderName!.
 ) ELSE (
-  ECHO.All download methods failed. Please obtain a copy of youtube-dl.exe and put it in
-  ECHO ^>^>^>!SELFDropTemp!^<^<^<
+	ECHO.All download methods failed. Please obtain a copy of !CL_ThirdPartyDownloader! and put it in
+	ECHO ^>^>^>!SELFDropTemp!^<^<^<
 )
 EXIT /B
 
@@ -602,47 +637,56 @@ EXIT /B
 EXIT /B
 
 
-:YoutubeDLFallback
-ECHO./^^!\ All other methods failed. Falling back on YoutubeDL.
+:ThirdPartyDownloaderFallback
+ECHO./^^!\ All other download methods failed. Falling back on !CL_ThirdPartyDownloaderName!.
 REM if everything else fails...
-IF NOT EXIST "!SELFDropTemp!youtube-dl.exe" (
-  CALL :YoutubeDLFallbackInitialStart
+IF NOT EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
+  CALL :ThirdPartyDownloaderFallbackInitialStart
 )
-CALL :CheckYoutubeDLForUpdates
-CALL :YoutubeDLDownloadAction
+CALL :CheckThirdPartyDownloaderForUpdates
+CALL :ThirdPartyDownloadAction
 EXIT /B
 
 
-:YoutubeDLDownloadAction
-FOR /F "usebackq tokens=*" %%A IN (`!YoutubeDL-X! --no-mark-watched --geo-bypass --get-filename !BuiltURL!`) DO (
-  SET "YTDLGetFilename=%%A"
+:ThirdPartyDownloadAction
+FOR /F "usebackq tokens=*" %%A IN (`!ThirdPartyDownload! --no-mark-watched --geo-bypass --get-filename !BuiltURL!`) DO (
+  SET "TPDGetFilename=%%A"
+  ECHO.!BuiltURL!
+  ECHO.!TPDGetFilename! &PAUSE >NUL
+  
 )
-REM ECHO.!YoutubeDL-X! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropTemp!!YTDLGetFilename!"
+IF NOT "!TPDCustomFileName!"=="" (
+	SET "TPDGetFilename=!TPDCustomFileName!"
+)
+REM ECHO.!ThirdPartyDownload! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropTemp!!TPDGetFilename!"
 REM ECHO.!BuiltURL!
 REM PAUSE
-START /MIN "b.dl.YtDL[%BdlSessionToken%] " !YoutubeDL-X! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropFolder![%%(uploader)s][!ServiceName!] !YTDLGetFilename!"
+START /MIN "b.dl.!CL_ThirdPartyDownloaderName![%BdlSessionToken%] " !ThirdPartyDownload! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropFolder![%%(uploader)s][!ServiceName!] !TPDGetFilename!"
+SET "TPDCustomFileName="
+SET "DDLFlag="
 EXIT /B
 
 
-:CheckYoutubeDLForUpdates
+:CheckThirdPartyDownloaderForUpdates
 REM Only check once in a runtime for updates
-IF DEFINED YoutubeDLUpdatedVer EXIT /B
-ECHO. Checking YoutubeDL stub for updates...
-FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-  SET "YoutubeDLCurrentVer=%%A"
+IF DEFINED ThirdPartyDownloaderUpdatedVer EXIT /B
+ECHO. Checking !CL_ThirdPartyDownloaderName! stub for updates...
+FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+  SET "ThirdPartyDownloaderCurrentVer=%%A"
 )
-START /WAIT "YoutubeDLUpdater" "!SELFDropTemp!youtube-dl.exe" -U
-IF EXIST "!SELFDropTemp!youtube-dl.exe.new" (
-	DEL /F /Q "!SELFDropTemp!youtube-dl.exe" >NUL
-	REN "!SELFDropTemp!youtube-dl.exe.new" "youtube-dl.exe" >NUL
+START /WAIT "!CL_ThirdPartyDownloaderName! Updater" "!SELFDropTemp!!CL_ThirdPartyDownloader!" -U
+IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!.new" (
+	DEL /F /Q "!SELFDropTemp!!CL_ThirdPartyDownloader!" >NUL
+	REN "!SELFDropTemp!!CL_ThirdPartyDownloader!.new" "!CL_ThirdPartyDownloader!" >NUL
 )
-FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!youtube-dl.exe --version`) DO (
-  SET "YoutubeDLUpdatedVer=%%A"
+FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+  SET "ThirdPartyDownloaderUpdatedVer=%%A"
 )
-IF NOT "!YoutubeDLCurrentVer!"=="!YoutubeDLUpdatedVer!" (
-  ECHO. ^>^>^> Successfully upgraded YoutubeDL from !YoutubeDLCurrentVer! to !YoutubeDLUpdatedVer!...
+IF NOT "!ThirdPartyDownloaderCurrentVer!"=="!ThirdPartyDownloaderUpdatedVer!" (
+  ECHO. ^>^>^> Successfully upgraded !CL_ThirdPartyDownloaderName! from !ThirdPartyDownloaderCurrentVer! to !ThirdPartyDownloaderUpdatedVer!...
 ) ELSE (
-  ECHO. ^>^>^> YoutubeDL is up to Date.
+  ECHO. You are running !CL_ThirdPartyDownloaderName! Version: !ThirdPartyDownloaderUpdatedVer!
+  ECHO. ^>^>^> !CL_ThirdPartyDownloaderName! is up to Date.
 )
 ECHO.
 EXIT /B
@@ -727,7 +771,7 @@ IF !URLDepthLevel! EQU 2 (
   ECHO./^^!\ URL might be too short for Information.
   ECHO.The URL you provided was:
   ECHO.
-  ECHO.       ^>^>^>!BuiltURL!^<^<^<
+  ECHO.       ^>^>^>!URL!^<^<^<
   ECHO.
   ECHO.Do you want to continue? [y/N]
   CHOICE /C YN /N >NUL
@@ -757,8 +801,9 @@ EXIT /B
 
 
 :BuildURL
+REM TODO Bug: https://motherless.com/A720F3F has two IDS
 SET "BuiltURL=!URL0!/"
-SET /A URLDepthLevel2=%URLDepthLevel% - 1
+SET "URLDepthLevel2=%URLDepthLevel%"
 FOR /L %%A IN (1,1,!URLDepthLevel2!) DO (
   SET "BuiltURL=!BuiltURL!/!URL%%A!"
 )
@@ -809,7 +854,7 @@ EXIT /B
 FOR %%A IN (!RedList!) DO (
   IF  "%%A"=="!ServiceName!" (
     ECHO.We won't even bother downloading this the normal way...
-    CALL :YoutubeDLFallback
+    CALL :ThirdPartyDownloaderFallback
     TIMEOUT /T 1 >NUL
     GOTO :MAIN
   )
@@ -825,7 +870,7 @@ EXIT /B
 PUSHD
 CHDIR !SELFDropTemp!
 FOR %%I in (*) DO (
-	IF /i NOT "%%~I"=="youtube-dl.exe" (
+	IF /i NOT "%%~I"=="!CL_ThirdPartyDownloader!" (
 		IF /i NOT "%%~I"=="dl.js" (
 			DEL /F /Q "%%~I"
 		)
@@ -841,7 +886,7 @@ EXIT /B
 SET "BitsadminDLMSessionHandle=%~1"
 SET "BitsadminDLMRemotePath=%~2"
 SET "BitsadminDLMLocalPath=%~3"
-bitsadmin /transfer b.dl-!BitsadminDLMSessionHandle!!BdlSessionToken! /priority FOREGROUND "!BitsadminDLMRemotePath!" "!BitsadminDLMLocalPath!"
+bitsadmin /transfer b.dl-!BitsadminDLMSessionHandle!!BdlSessionToken! /priority HIGH "!BitsadminDLMRemotePath!" "!BitsadminDLMLocalPath!"
 SET "BitsadminDLMErrorlevel=!ERRORLEVEL!"
 EXIT /B
 
@@ -923,7 +968,27 @@ EXIT /B
 
 
 ::: ---
-
+:Realm_direct_download
+SET "CurrentRealm=ddl"
+TITLE b.dl - Downloading directly from !ServiceName!
+SET "CL_Codebase=30-12-2020"
+IF EXIST "!SELFDropFolder![NA] [!ServiceName!]!TPDCustomFileName!" (
+	ECHO.An identical file already exists. Stopped downloading.
+	ECHO.Returning in 5 seconds...
+	SET "TPDCustomFileName="
+	SET "DDLFlag="
+	TIMEOUT /T 5 >NUL
+	GOTO :MAIN
+)
+START "" %~dpnx0 "PopOut" "DDLMAN" "!URL!" "!SELFDropFolder![NA] [!ServiceName!]!TPDCustomFileName!" "!TPDCustomFileName!"
+ECHO.The video will be queued and downloaded in the background. Check back later.
+ECHO.Returning...
+SET "TPDCustomFileName="
+SET "DDLFlag="
+TIMEOUT /T 3 >NUL
+!ParametricDownloadSwitch!
+GOTO :MAIN
+EXIT /B
 
 :Realm_eroxia
 SET "CurrentRealm=eroxia"
