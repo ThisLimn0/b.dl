@@ -1,5 +1,5 @@
 @ECHO OFF & SETLOCAL EnableDelayedExpansion
-TITLE b.dl [stat:INIT] - Initialisation...
+TITLE b.dl Initialisation   ///   [stat:INIT]
 MODE 120,31
 COLOR 1B
 
@@ -25,14 +25,14 @@ COLOR 1B
 :::        ▐▀▀▄ ▐▀▀▪▄▐█▐█• ▄█▀▄ ██▪   ▐█.▪
 :::        ▐█•█▌▐█▄▄▌ ███ ▐█▌.▐▌▐█▌▐▌ ▐█▌·
 :::        .▀  ▀ ▀▀▀ . ▀   ▀█▄▀▪.▀▀▀  ▀▀▀
-:::        (ccc)2020 by Limn0 @ NerdRevolt
+:::        (ccc)2022 by Limn0 @ NerdRevolt
 :::
 :::    /// ::: /// ::: /// ::: /// ::: /// :::
 
 
-SET "VER=0.5.0"
-SET "VERSION=0.5.0-211210"
-
+SET "VER=0.5.2"
+SET "VERSION=0.5.2-220217"
+TITLE b.dl - Initialisation...   ///   [bdl: !VERSION!; stat: INIT]
 
 IF /I "%~1"=="PopOut" (
 	SETLOCAL EnableDelayedExpansion
@@ -51,6 +51,10 @@ IF /I "%~1"=="PopOut" (
 
 
 IF /I "%~1"=="QuickDownload" (
+	IF "%~2"=="" (
+		ECHO.Parameter QuickDownload was supplied, but no Link to Download. 
+		EXIT /B
+	)
 	SET "ParametricDownloadLink=%~2"
 	ECHO.!ParametricDownloadLink!
 	PAUSE >NUL
@@ -58,6 +62,7 @@ IF /I "%~1"=="QuickDownload" (
 )
 
 :MAIN
+COLOR 1B
 CLS
 
 
@@ -77,16 +82,8 @@ SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt
 
 
 REM ///Supported services/////////
-SET "Modules1=eroxia xvideos xnxx direct_download"
-SET "Modules2="
-SET "Modules3="
-SET "Modules4="
-SET "Modules5="
+SET "Modules=eroxia xvideos xnxx direct_download"
 REM //////////////////////////////
-
-REM ///Websites with dash-video can't be handeled with batch./////////
-SET "Redlist=pornhub youporn zdf nrk"
-REM //////////////////////////////////////////////////////////////////
 
 REM CALL :StatusViaTitle test EnclosureA test test /// TODO Finish this module
 IF NOT DEFINED FirstStart CALL :InitVars
@@ -99,7 +96,6 @@ CALL :SanitiseUserInput
 CALL :AnalyseInput
 CALL :IsServiceSupported
 CALL :BuildURL
-CALL :IsServiceOnRedlist
 ECHO.-[InfoLine]- Service:[!ServiceName!] IsServiceSupported:!ServiceSupported2! URL:!BuiltURL!
 IF DEFINED ServiceSupported (
 	CALL :FindRealm
@@ -130,15 +126,15 @@ IF NOT DEFINED SupportedServices (
 SET "REMF="
 SET "UsableLines=30"
 SET "SELF=%~dp0"
-SET "SELFEXT=%~dpnx0"
+SET "SELFExt=%~dpnx0"
 SET "SELFDropFolder=!SELF!Downloads\"
 SET "SELFDropTemp=!SELFDropFolder!Temp\"
 SET "ThirdPartyDownload=!SELFDropFolder!Temp\!CL_ThirdPartyDownloader!"
 CALL :DoesWorkspaceExist
 IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
-	FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
-  	SET "ThirdPartyDownloaderInitVer=%%A"
-	)
+    FOR /F "usebackq tokens=*" %%A IN (`!SELFDropTemp!!CL_ThirdPartyDownloader! --version`) DO (
+       SET "ThirdPartyDownloaderInitVer=%%A"
+    )
 ) ELSE (
 	SET "ThirdPartyDownloaderInitVer=unknown"
 )
@@ -397,7 +393,7 @@ IF /i "!URL!"=="restart" (
 		ECHO.Restarting in %%A...
 		TIMEOUT /T 1 >NUL
 	)
-	START "" "!SELFEXT!"
+	START "" "!SELFExt!"
 	EXIT
 )
 IF "!URL!" EQU "" (
@@ -417,7 +413,7 @@ CALL :KillUnallowedCharacters URL URL
 REM Really bad workaround to a direct download related issue below, will fix later
 SET URLDepthLevel=-1
 
-FOR /F "tokens=1,2,3,4,5,6,7,8,9 delims=/" %%A IN ("!URL!") DO (
+FOR /F "tokens=1-9 delims=/" %%A IN ("!URL!") DO (
   SET "URL0=%%A"
   IF DEFINED URL0 (
     SET "URL1=%%B"
@@ -489,7 +485,7 @@ SET "Delimiter=%3"
 SET "CustomIdentifier=%4"
 REM ECHO.DeBug: !VarIn! !VarOut! !%VarIn%! !%VarOut%! !Delimiter!
 SET "!VarOut!DepthLevel!CustomIdentifier!=0"
-FOR /F "tokens=1,2,3,4,5,6,7,8,9 delims=%Delimiter%" %%A IN ("!%VarIn%!!") DO (
+FOR /F "tokens=1-9 delims=%Delimiter%" %%A IN ("!%VarIn%!!") DO (
   SET "!VarOut!0!CustomIdentifier!=%%A"
   IF DEFINED !VarOut!0!CustomIdentifier! (
     SET "!VarOut!1!CustomIdentifier!=%%B"
@@ -649,19 +645,7 @@ EXIT /B
 
 
 :ThirdPartyDownloadAction
-FOR /F "usebackq tokens=*" %%A IN (`!ThirdPartyDownload! --no-mark-watched --geo-bypass --get-filename !BuiltURL!`) DO (
-  SET "TPDGetFilename=%%A"
-  ECHO.!BuiltURL!
-  ECHO.!TPDGetFilename! &PAUSE >NUL
-  
-)
-IF NOT "!TPDCustomFileName!"=="" (
-	SET "TPDGetFilename=!TPDCustomFileName!"
-)
-REM ECHO.!ThirdPartyDownload! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropTemp!!TPDGetFilename!"
-REM ECHO.!BuiltURL!
-REM PAUSE
-START /MIN "b.dl.!CL_ThirdPartyDownloaderName![%BdlSessionToken%] " !ThirdPartyDownload! --no-mark-watched --geo-bypass --write-thumbnail --no-playlist -R 42 --fragment-retries 42 !BuiltURL! -o "!SELFDropFolder![%%(uploader)s][!ServiceName!] !TPDGetFilename!"
+START "b.dl Download [!!]"!SELFDropTemp!!CL_ThirdPartyDownloader! --write-thumbnail !BuiltURL! --restrict-filenames -o "!SELFDropFolder![%%(uploader)s][!ServiceName!]%%(title)s.%%(ext)s"
 SET "TPDCustomFileName="
 SET "DDLFlag="
 EXIT /B
@@ -801,16 +785,14 @@ EXIT /B
 
 
 :BuildURL
-REM TODO Bug: https://motherless.com/A720F3F has two IDS
 SET "BuiltURL=!URL0!/"
 SET "URLDepthLevel2=%URLDepthLevel%"
 FOR /L %%A IN (1,1,!URLDepthLevel2!) DO (
   SET "BuiltURL=!BuiltURL!/!URL%%A!"
 )
+ECHO.!URL:~-1!
 IF "!URL:~-1!"=="/" (
-	SET "BuiltURL=!BuiltURL!!URL%URLDepthLevel%!/"
-) ELSE (
-	SET "BuiltURL=!BuiltURL!!URL%URLDepthLevel%!"
+	SET "BuiltURL=!BuiltURL!!URL%URLDepthLevel%!/" 
 )
 EXIT /B
 
@@ -849,17 +831,6 @@ FOR %%A IN (!SupportedServices!) DO (
 )
 EXIT /B
 
-
-:IsServiceOnRedlist
-FOR %%A IN (!RedList!) DO (
-  IF  "%%A"=="!ServiceName!" (
-    ECHO.We won't even bother downloading this the normal way...
-    CALL :ThirdPartyDownloaderFallback
-    TIMEOUT /T 1 >NUL
-    GOTO :MAIN
-  )
-)
-EXIT /B
 
 :TODO
 
@@ -944,7 +915,6 @@ ECHO.Something went wrong^^!
 ECHO.This download module and/or service push is failing.
 PAUSE >NUL
 GOTO :MAIN
-EXIT /B
 
 
 ::: ---
