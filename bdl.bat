@@ -30,8 +30,8 @@ COLOR 1B
 :::    /// ::: /// ::: /// ::: /// ::: /// :::
 
 
-SET "VER=0.5.3"
-SET "VERSION=0.5.3-220217"
+SET "VER=0.5.4"
+SET "VERSION=0.5.4-220218"
 TITLE b.dl - Initialisation...   ///   [bdl: !VERSION!; stat: INIT]
 
 IF /I "%~1"=="PopOut" (
@@ -68,15 +68,15 @@ CLS
 
 ::USER:SETTINGS:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
-SET "CL_MakeMode=0"				 ::: Special mode for development of realms and modules	1/on 0/off
-SET "CL_DisplayCodebase=1"		 ::: Display codebase versions in the title				1/on 0/off
-SET "CL_DisplayHeader=1"		 ::: Display header										1/on 0/off
-SET "CL_ForgetUserInput=1"		 ::: Reset user input after download					1/on 0/off
-SET "CL_DupeDetectLogging=1"	 ::: Log session for duplicate detection				1/on 0/off
+SET "CL_MakeMode=0"				 ::: Special mode for development of realms and modules   1/on 0/off
+SET "CL_DisplayCodebase=1"		 ::: Display codebase versions in the title				    1/on 0/off
+SET "CL_DisplayHeader=1"		 ::: Display header										          1/on 0/off
+SET "CL_ForgetUserInput=1"		 ::: Reset user input after download					       1/on 0/off
+SET "CL_DupeDetectLogging=1"	 ::: Log session for duplicate detection				       1/on 0/off
 SET "CL_ThirdPartyDownloader=yt-dlp.exe" ::: Third party command line downloader tool filename
 SET "CL_ThirdPartyDownloaderName=yt-dlp" ::: Name of the third party tool for UI reasons
-SET "DS_ThirdPartyDownloaderDownloadGithub=https://github.com/yt-dlp/yt-dlp/releases/download/2021.12.01/yt-dlp.exe"
-SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+SET "DS_ThirdPartyDownloaderDownloadGithub=https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt-dlp/yt-dlp/releases/download/2021.12.01/yt-dlp.exe"
 :::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -295,13 +295,15 @@ FOR %%A IN (!HELPSTR!) DO (
 		ECHO. b.dl - [!HELPSTR!]
 		ECHO.	Usage: Put website link to download content into window.
 		ECHO.	Currently Supported Services: !SupportedServices!
-		ECHO.	The following services require !CL_ThirdPartyDownloaderName!: !RedList!
+		ECHO.	Some services require !CL_ThirdPartyDownloaderName! or another third party downloader.
 		ECHO.
 		ECHO. Available Commands:
-		ECHO.	Update !CL_ThirdPartyDownloaderName!: 			u /u -u upd -upd /upd update
-		ECHO.	Test installed download modules: 	tdm /tdm -tdm test_download_modules
-		ECHO.	Test all modules:			t /t -t /test -test test_all test_all_components
-		ECHO.	This help document:			h /h -h /help -help --help help
+		ECHO.   Update !CL_ThirdPartyDownloaderName!:                   !UPDATESTR!
+		ECHO.   Test installed download modules: !TESTSTRDL!
+		ECHO.   Test all modules:                !TESTSTR!
+		ECHO.   This help document:              !HELPSTR!
+		ECHO.   MakeMode ^(dev mode^):             !MKMDSTR!
+		ECHO.   Exit:                            !EXITSTR!
 		ECHO.
 		ECHO. Press Any [Key] to continue.
 		PAUSE >NUL
@@ -641,7 +643,8 @@ EXIT /B
 
 
 :ThirdPartyDownloadAction
-START "b.dl Download [!!]"!SELFDropTemp!!CL_ThirdPartyDownloader! --write-thumbnail !BuiltURL! --restrict-filenames -o "!SELFDropFolder![%%(uploader)s][!ServiceName!]%%(title)s.%%(ext)s"
+ECHO. Downloading progressing in the Background.
+START /MIN "b.dl Download [!BdlSessionToken!]" !SELFDropTemp!!CL_ThirdPartyDownloader! --write-thumbnail !BuiltURL! --restrict-filenames -o "!SELFDropFolder![%%(uploader)s][!ServiceName!]%%(title)s.%%(ext)s"
 SET "TPDCustomFileName="
 SET "DDLFlag="
 EXIT /B
