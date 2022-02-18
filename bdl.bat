@@ -30,8 +30,8 @@ COLOR 1B
 :::    /// ::: /// ::: /// ::: /// ::: /// :::
 
 
-SET "VER=0.5.2"
-SET "VERSION=0.5.2-220217"
+SET "VER=0.5.3"
+SET "VERSION=0.5.3-220217"
 TITLE b.dl - Initialisation...   ///   [bdl: !VERSION!; stat: INIT]
 
 IF /I "%~1"=="PopOut" (
@@ -82,7 +82,7 @@ SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt
 
 
 REM ///Supported services/////////
-SET "Modules=eroxia xvideos xnxx direct_download"
+SET "SupportedServices=eroxia xvideos xnxx direct_download"
 REM //////////////////////////////
 
 REM CALL :StatusViaTitle test EnclosureA test test /// TODO Finish this module
@@ -115,10 +115,6 @@ GOTO :MAIN
 
 :InitVars
 SET "FirstStart=1"
-REM FOR /L %%A in (1,1,5) DO (
-REM   IF DEFINED Modules%%A SET "SupportedServices=!SupportedServices! !Modules%%A!"
-REM )
-SET "SupportedServices=!Modules1!!Modules2!!Modules3!!Modules4!!Modules5!"
 IF NOT DEFINED SupportedServices (
     ECHO.No services are currently supported. Maybe code some for yourself. Or nag the devs.
     SET "SupportedServices=."
