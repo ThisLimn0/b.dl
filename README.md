@@ -1,6 +1,30 @@
-# b.dl
-Batch Download Manager
+```
+                     _/                 _/                  _/     _/
+                      _/               _/_/_/          _/_/_/     _/
+                       _/             _/    _/      _/    _/     _/
+                    _/              _/    _/      _/    _/ _/_/_/
+                 _/    _/_/_/_/    _/_/_/    _/    _/_/_/   _/_/_/_/_/
+                                                             _/
+                     /// ::::: /// :[b.dl]: /// ::::: /// :::
+                       A pure batch download manager script
+                       only using the given windows utils.
+                       Many fallback options are available.
 
+                         ·   ·▐ ▄ ▄▄▄ .▄▄▄  ·▄▄▄▄▪  ·  ▪
+                           · •█▌▐█▀▄.▀·▀▄ █·██▪ ██   .
+                         ▪   ▐█▐▐▌▐▀▀▪▄▐▀▀▄ ▐█· ▐█▌   ▪
+                          · ▪██▐█▌▐█▄▄▌▐█•█▌██. ██ .   .
+                         ▪   ▀▀ █▪ ▀▀▀ .▀  ▀▀▀▀▀▀•  ▪
+                         ▄▄▄  ▄▄▄ . ▌ ▐·  .   ▄▄▌ ▐▄▄▄▄▌
+                         ▀▄ █·▀▄.▀·▪█·█▌▪     ██•  •██
+                         ▐▀▀▄ ▐▀▀▪▄▐█▐█• ▄█▀▄ ██▪   ▐█.▪
+                         ▐█•█▌▐█▄▄▌ ███ ▐█▌.▐▌▐█▌▐▌ ▐█▌·
+                         .▀  ▀ ▀▀▀ . ▀   ▀█▄▀▪.▀▀▀  ▀▀▀
+                         (ccc)2022 by Limn0 @ NerdRevolt
+
+                     /// ::: /// ::: /// ::: /// ::: /// :::
+```
+---
 ![Screenshot of the help screen](https://i.imgur.com/2RL0ze7.png "b.dl Help")
 
 Usage:
