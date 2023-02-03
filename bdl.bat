@@ -30,18 +30,35 @@ COLOR 1B
 :::    /// ::: /// ::: /// ::: /// ::: /// :::
 
 
-SET "VER=0.5.4"
-SET "VERSION=0.5.4-220218"
+::USER:SETTINGS:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
+SET "CL_MakeMode=0"				 ::: Special mode for development of realms and modules   1/on 0/off
+SET "CL_DisplayCodebase=1"		 ::: Display codebase versions in the title				    1/on 0/off
+SET "CL_DisplayHeader=1"		 ::: Display header										          1/on 0/off
+SET "CL_ForgetUserInput=1"		 ::: Reset user input after download					       1/on 0/off
+SET "CL_DupeDetectLogging=1"	 ::: Log session for duplicate detection				       1/on 0/off
+SET "CL_Threads=10"            ::: yt-dlp multi threaded download
+SET "CL_ThirdPartyDownloader=yt-dlp.exe" ::: Third party command line downloader tool filename
+SET "CL_ThirdPartyDownloaderName=yt-dlp" ::: Name of the third party tool for UI reasons
+SET "DS_ThirdPartyDownloaderDownloadGithub=https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt-dlp/yt-dlp/releases/download/2021.12.01/yt-dlp.exe"
+:::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+SET "VER=0.5.5"
+SET "VERSION=0.5.5-230203"
 TITLE b.dl - Initialisation...   ///   [bdl: !VERSION!; stat: INIT]
+
 
 IF /I "%~1"=="PopOut" (
 	SETLOCAL EnableDelayedExpansion
 	ECHO.Starting up...
 	SET "BitsAdminSession=%~2"
-	SET "FilenameInTitle= // %~5"
-	TITLE b.dl -[!BitsAdminSession!]- Download PopOut!FilenameInTitle!
 	SET "RemoteURL=%~3"
 	SET "LocalURL=%~4"
+	SET "FilenameInTitle= // %~5"
+	TITLE b.dl -[!BitsAdminSession!]- Download PopOut!FilenameInTitle!
 	MODE 70,8
 	COLOR 1B
 	CALL :BitsadminDownload "!BitsAdminSession!" "!RemoteURL!" "!LocalURL!"
@@ -52,7 +69,7 @@ IF /I "%~1"=="PopOut" (
 
 IF /I "%~1"=="QuickDownload" (
 	IF "%~2"=="" (
-		ECHO.Parameter QuickDownload was supplied, but no Link to Download. 
+		ECHO.Parameter "QuickDownload" was supplied, but no link to download.
 		EXIT /B
 	)
 	SET "ParametricDownloadLink=%~2"
@@ -61,28 +78,15 @@ IF /I "%~1"=="QuickDownload" (
 	SET "ParametricDownloadSwitch=EXIT"
 )
 
+
+::: /// :[MAIN START]: /// :::
+
 :MAIN
 COLOR 1B
 CLS
 
-
-::USER:SETTINGS:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
-SET "CL_MakeMode=0"				 ::: Special mode for development of realms and modules   1/on 0/off
-SET "CL_DisplayCodebase=1"		 ::: Display codebase versions in the title				    1/on 0/off
-SET "CL_DisplayHeader=1"		 ::: Display header										          1/on 0/off
-SET "CL_ForgetUserInput=1"		 ::: Reset user input after download					       1/on 0/off
-SET "CL_DupeDetectLogging=1"	 ::: Log session for duplicate detection				       1/on 0/off
-SET "CL_ThirdPartyDownloader=yt-dlp.exe" ::: Third party command line downloader tool filename
-SET "CL_ThirdPartyDownloaderName=yt-dlp" ::: Name of the third party tool for UI reasons
-SET "DS_ThirdPartyDownloaderDownloadGithub=https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-SET "DS_ThirdPartyDownloaderDownloadGithubAlternateVersion=https://github.com/yt-dlp/yt-dlp/releases/download/2021.12.01/yt-dlp.exe"
-:::: /// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// ::: /// ::: /// ::: /// :::/// ::: /// :::
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-
 REM ///Supported services/////////
-SET "SupportedServices=eroxia xvideos xnxx direct_download"
+SET "SupportedServices=direct_download"
 REM //////////////////////////////
 
 REM CALL :StatusViaTitle test EnclosureA test test /// TODO Finish this module
@@ -99,8 +103,7 @@ CALL :BuildURL
 ECHO.-[InfoLine]- Service:[!ServiceName!] IsServiceSupported:!ServiceSupported2! URL:!BuiltURL!
 IF DEFINED ServiceSupported (
 	CALL :FindRealm
-)
-IF "!ServiceSupported2!"=="true" (
+) ELSE IF "!ServiceSupported2!"=="true" (
 	CALL :FindRealm
 )
 REM IF !ServiceSupported! EQU 1 CALL :FileCheck DownloadTry1
@@ -109,7 +112,6 @@ REM CALL :FileCheck DownloadTry2
 TIMEOUT /T 1 >NUL
 GOTO :MAIN
 
-
 ::: /// :[MAIN END]: /// :::
 
 
@@ -117,7 +119,7 @@ GOTO :MAIN
 SET "FirstStart=1"
 IF NOT DEFINED SupportedServices (
     ECHO.No services are currently supported. Maybe code some for yourself. Or nag the devs.
-    SET "SupportedServices=."
+    SET "SupportedServices=none"
 )
 SET "REMF="
 SET "UsableLines=30"
@@ -141,7 +143,8 @@ EXIT /B
 
 
 :MakeModeInit
-REM // Alternate Path for development reasons.
+::: /// :[MakeMode]: /// :::
+::: Developer mode. For testing and debugging.
 SET "BdlSessionToken=MKMD"
 SET "ZZZ=0"
 SET "MakeModeInterrupt=MakeMode activated^!"
@@ -271,7 +274,7 @@ EXIT /B
 
 
 :SanitiseUserInput
-SET "HELPSTR=h -h /h --h hlp -hlp /hlp --hlp help -help /help --help"
+SET "HELPSTR=h -h /h --h hlp -hlp /hlp --hlp help -help /help --help ? -? /? --?"
 SET "TESTSTR=t -t /t --t test -test /test --test test_all -test_all /test_all --test_all test_all_components -test_all_components /test_all_components --test_all_components"
 SET "TESTSTRDL=td -td /td --td tdm -tdm /tdm --tdm test_download_modules -test_download_modules /test_download_modules --test_download_modules"
 SET "UPDATESTR=u -u /u --u upd -upd /upd --upd update -update /update --update"
@@ -337,7 +340,7 @@ FOR %%A IN (!UPDATESTR!) DO (
     IF /i "!URL!"=="%%A" (
 		IF DEFINED ThirdPartyDownloaderUpdatedVer (
 			ECHO. b.dl - [update !CL_ThirdPartyDownloaderName! base]
-			ECHO. 
+			ECHO.
 			ECHO. You are running !CL_ThirdPartyDownloaderName! Version: !ThirdPartyDownloaderUpdatedVer!
 			ECHO. !CL_ThirdPartyDownloaderName! is up to date.
 			IF EXIST "!SELFDropTemp!!CL_ThirdPartyDownloader!" (
@@ -644,7 +647,7 @@ EXIT /B
 
 :ThirdPartyDownloadAction
 ECHO. Downloading progressing in the Background.
-START /MIN "b.dl Download [!BdlSessionToken!]" !SELFDropTemp!!CL_ThirdPartyDownloader! --write-thumbnail !BuiltURL! --restrict-filenames -o "!SELFDropFolder![%%(uploader)s][!ServiceName!]%%(title)s.%%(ext)s"
+START /MIN "b.dl Download [!BdlSessionToken!]" !SELFDropTemp!!CL_ThirdPartyDownloader! --concurrent-fragments -N !CL_Threads! --write-thumbnail !BuiltURL! --restrict-filenames -o "!SELFDropFolder![%%(uploader)s][!ServiceName!]%%(title)s.%%(ext)s"
 SET "TPDCustomFileName="
 SET "DDLFlag="
 EXIT /B
@@ -791,7 +794,7 @@ FOR /L %%A IN (1,1,!URLDepthLevel2!) DO (
 )
 ECHO.!URL:~-1!
 IF "!URL:~-1!"=="/" (
-	SET "BuiltURL=!BuiltURL!!URL%URLDepthLevel%!/" 
+	SET "BuiltURL=!BuiltURL!!URL%URLDepthLevel%!/"
 )
 EXIT /B
 
@@ -958,456 +961,4 @@ TIMEOUT /T 3 >NUL
 !ParametricDownloadSwitch!
 GOTO :MAIN
 EXIT /B
-
-:Realm_eroxia
-SET "CurrentRealm=eroxia"
-TITLE b.dl - Downloading from eroxia!CL_Codebase!
-REM // https://www.eroxia.com/video/xxx-xxxxxxx-xxxxxxxx-xxx-xxx-xxx-xxx-xxx-xxxxx-nnnnnn.html
-REM // https://www.eroxia.com/embed/nnnnnn
-REM Check if link is already embed, then skip to downloading since video clear link is on embed page
-IF EXIST "!SELFDropTemp!temp.mp4" (
-	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
-)
-IF EXIST "!SELFDropTemp!temp.html" (
-	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
-)
-IF "!URL2!"=="embed" (
-	ECHO.[!CurrentRealm!] Link type: [!URL2!]
-	SET "EmbedURL=!BuiltURL!"
-	SET "FileName=EROXIA-!URL3!"
-	GOTO :eroxia_DL_Webpage
-)
-IF "!URL10A!"=="media" (
-	ECHO.[!CurrentRealm!] Link type: [direct]
-	SET "DownloadURL=!BuiltURL!"
-	SET /A X=URLDepthLevel-1
-	SET "FileName=!URL%X%!"
-	GOTO :eroxia_Download
-)
-REM Get video code
-ECHO.[!CurrentRealm!] Link type: [video]
-SET A=1
-FOR /L %%A IN (1,1,100) DO (
-	IF "!URL3:~%%A,1!"=="-" (
-		SET /A A+=1
-	)
-)
-FOR /F "tokens=%A%* delims=-+." %%A IN ("!URL3!") DO (
-	SET "VideoID=%%A"
-)
-IF DEFINED VideoID (
-	ECHO.[!CurrentRealm!] Got VideoID.
-)
-SET "EmbedURL=https://www.eroxia.com/embed/!VideoID!"
-:eroxia_DL_Webpage
-SET "CurrentRealm=eroxia"
-ECHO.[!CurrentRealm!] Downloading webpage...
-CALL :JavascriptDownload "!EmbedURL!" "!SELFDropTemp!temp.html"
-ECHO.[!CurrentRealm!] Parsing webpage...
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "video/mp4" ') DO (
-	SET "SourceLine=%%A"
-)
-ECHO.[!CurrentRealm!] Getting download URL...
-SET "SourceLine=!SourceLine:~13!"
-SET "DownloadURL=!SourceLine:~0,-19!"
-SET "FileName=!URL3:~0,-5!"
-IF !CL_MakeMode! EQU 1 (
-	REM ECHO.!VideoTitle!
-	REM ECHO.!SourceLineLow!
-	ECHO.[!CurrentRealm!] !DownloadURL!
-	REM ECHO.!UploaderID!
-	REM ECHO.!ThumbnailMosaique!
-	REM ECHO.!Thumbnail!
-	PAUSE >NUL
-)
-:eroxia_Download
-SET "CurrentRealm=eroxia"
-ECHO.[!CurrentRealm!] Starting download...
-START /WAIT "" %~dpnx0 "PopOut" "EOAMFDL" "!DownloadURL!" "!SELFDropTemp!temp.mp4"
-TIMEOUT /T 3 >NUL
-ECHO.
-ECHO.Renaming temp.mp4
-RENAME "!SELFDropTemp!temp.mp4" "!FileName!.mp4" >NUL
-ECHO.                  --^>
-ECHO.                       !FileName!.mp4
-ECHO.
-ECHO.Moving file to !SELFDropFolder!.
-MOVE "!SELFDropTemp!!FileName!.mp4" "!SELFDropFolder!" >NUL
-ECHO.[!CurrentRealm!] Download finished.
-TIMEOUT /T 5 >NUL
-!ParametricDownloadSwitch!
-GOTO :MAIN
-EXIT /B
-
-
-::: ---
-
-
-:Realm_xvideos
-SET "CurrentRealm=xvideos"
-REM // https://www.xvideos.com/videonnnnnnnn/lil_d_wird_beim_ficken_von_valerie_kay_auf_dem_balkon_erwischt
-REM // https://www.xvideos.com/embedframe/nnnnnnnn
-REM Check if link is already embed, then skip to downloading since video clear link is on embed page
-IF EXIST "!SELFDropTemp!temp.mp4" (
-	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
-)
-IF EXIST "!SELFDropTemp!temp.html" (
-	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
-)
-IF "!URL2!"=="embedframe" (
-	ECHO.[!CurrentRealm!] Link type: [embed]
-	SET "EmbedURL=!BuiltURL!"
-	SET "FileName=XVIDEOS-!URL3!"
-	GOTO :xvideos_DL_Webpage
-)
-REM Get video code, link is webpage, not embed
-ECHO.[!CurrentRealm!] Link type: [video]
-SET "VideoID=!URL2:video=!"
-IF DEFINED VideoID (
-	ECHO.[!CurrentRealm!] Got VideoID...
-)
-SET "EmbedURL=https://www.xvideos.com/embedframe/!VideoID!"
-:xvideos_DL_Webpage
-SET "CurrentRealm=xvideos"
-ECHO.[!CurrentRealm!] Downloading webpage...
-CALL :JavascriptDownload "!EmbedURL!" "!SELFDropTemp!temp.html"
-ECHO.[!CurrentRealm!] Parsing webpage...
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoTitle" ') DO (
-	SET "VideoTitle=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlLow" ') DO (
-	SET "SourceLineLow=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlHigh" ') DO (
-	SET "SourceLineHigh=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setUploaderName" ') DO (
-	SET "UploaderID=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbSlide" ') DO (
-	SET "ThumbnailMosaique=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbUrl" ') DO (
-	SET "Thumbnail=%%A"
-	GOTO :xvideos_DL_ManageDownloadVars
-)
-
-:xvideos_DL_ManageDownloadVars
-SET "CurrentRealm=xvideos"
-SET "VideoTitle=!VideoTitle: =_!"
-SET "VideoTitle=!VideoTitle:~32!"
-SET "VideoTitle=!VideoTitle:~0,-3!"
-SET "SourceLineLow=!SourceLineLow: =!"
-SET "SourceLineLow=!SourceLineLow:~29!"
-SET "SourceLineLow=!SourceLineLow:~0,-3!"
-SET "SourceLineHigh=!SourceLineHigh: =!"
-SET "SourceLineHigh=!SourceLineHigh:~30!"
-SET "SourceLineHigh=!SourceLineHigh:~0,-3!"
-SET "UploaderID=!UploaderID: =!"
-SET "UploaderID=!UploaderID:~30!"
-SET "UploaderID=!UploaderID:~0,-3!"
-IF DEFINED XNXXFlag (
-	SET "Thumbnail=!Thumbnail: =!"
-	SET "Thumbnail=!Thumbnail:~26!"
-	SET "Thumbnail=!Thumbnail:~0,-3!"
-	SET "ThumbnailMosaique=!Thumbnail!"
-	SET "FileName=!VideoTitle!-!UploaderID!"
-	ECHO.Video title: !VideoTitle! by !UploaderID!
-	FOR /L %%A IN (1,1,1000) DO (
-		IF "!VideoTitle:~%%A,1!"=="&" (
-			ECHO.[!CurrentRealm!] Found regional encoded video title.
-			ECHO.[!CurrentRealm!] Falling back to original title.
-			SET "FileName=!URL5!-!UploaderID!"
-			ECHO.[!CurrentRealm!] New video title: !URL5! by !UploaderID!
-			SET "XNXXFlag="
-			GOTO :xvideos_escape_loop
-		)
-	)
-	SET "XNXXFlag="
-	GOTO :xvideos_escape_loop
-)
-SET "Thumbnail=!Thumbnail: =!"
-SET "Thumbnail=!Thumbnail:~26!"
-SET "Thumbnail=!Thumbnail:~0,-3!"
-SET "ThumbnailMosaique=!ThumbnailMosaique: =!"
-SET "ThumbnailMosaique=!ThumbnailMosaique:~28!"
-SET "ThumbnailMosaique=!ThumbnailMosaique:~0,-3!"
-REM
-REM ECHO.!Thumbnail!
-SET "FileName=!VideoTitle!-!UploaderID!"
-ECHO.[!CurrentRealm!] Video title: !VideoTitle! by !UploaderID!
-FOR /L %%A IN (1,1,1000) DO (
-	IF "!VideoTitle:~%%A,1!"=="&" (
-		ECHO.Found regional encoded video title.
-		ECHO.Falling back to original title.
-		SET "FileName=!URL5!-!UploaderID!"
-		ECHO.New video title: !URL5! by !UploaderID!
-		GOTO :xvideos_escape_loop
-	)
-)
-:xvideos_escape_loop
-SET "CurrentRealm=xvideos"
-IF !CL_MakeMode! EQU 1 (
-	ECHO.!VideoTitle!
-	ECHO.!SourceLineLow!
-	ECHO.!SourceLineHigh!
-	ECHO.!UploaderID!
-	ECHO.!ThumbnailMosaique!
-	ECHO.!Thumbnail!
-	PAUSE >NUL
-)
-:xvideos_Download
-SET "CurrentRealm=xvideos"
-ECHO.[!CurrentRealm!] Retreiving thumbnail...
-CALL :JavascriptDownload "!ThumbnailMosaique!" "!SELFDropTemp!thumb.jpg"
-ECHO.[!CurrentRealm!] Starting download...
-START /WAIT "" %~dpnx0 "PopOut" "XVDMFDL" "!SourceLineHigh!" "!SELFDropTemp!temp.mp4"
-ECHO.[!CurrentRealm!] Download complete.
-TIMEOUT /T 2 >NUL
-ECHO.[!CurrentRealm!] Renaming temp.mp4
-RENAME "!SELFDropTemp!temp.mp4" "!FileName!.mp4" >NUL
-RENAME "!SELFDropTemp!thumb.jpg" "!FileName!_thumb.jpg" >NUL
-ECHO.                                   --^>
-ECHO.                                        !FileName!.mp4
-ECHO.Moving file to !SELFDropFolder!.
-MOVE "!SELFDropTemp!!FileName!.mp4" "!SELFDropFolder!" >NUL
-MOVE "!SELFDropTemp!!FileName!_thumb.jpg" "!SELFDropFolder!" >NUL
-ECHO.[!CurrentRealm!] Download finished.
-TIMEOUT /T 5 >NUL
-!ParametricDownloadSwitch!
-GOTO :MAIN
-EXIT /B
-
-
-::: ---
-
-
-:Realm_xnxx
-SET "CurrentRealm=xnxx"
-SET "XNXXFlag=1"
-IF EXIST "!SELFDropTemp!temp.mp4" (
-	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
-)
-IF EXIST "!SELFDropTemp!temp.html" (
-	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
-)
-ECHO.[!CurrentRealm!] Downloading webpage...
-CALL :JavascriptDownload "!BuiltURL!" "!SELFDropTemp!temp.html"
-ECHO.[!CurrentRealm!] Parsing webpage...
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "new HTML5Player" ') DO (
-	SET "VideoID=%%A"
-)
-SET "VideoID=!VideoID:~50!"
-SET "VideoID=!VideoID:~0,-3!
-SET "EmbedURL=https://www.xvideos.com/embedframe/!VideoID!"
-IF !CL_MakeMode! EQU 1 (
-	ECHO.!EmbedURL!
-	REM ECHO.!VideoTitle!
-	REM ECHO.!SourceLineLow!
-	REM ECHO.!SourceLineHigh!
-	REM ECHO.!UploaderID!
-	REM ECHO.!ThumbnailMosaique!
-	REM ECHO.!Thumbnail!
-)
-GOTO :xvideos_DL_Webpage
-EXIT /B
-
-
-::: ---
-
-:TODO
-
-:Realm_xhamster
-
-:::Currently broken until i fix the m3u8 fuckery.
-
-EXIT /B
-SET "CurrentRealm=xhamster"
-TITLE b.dl - Downloading from xhamster!CL_Codebase!
-REM // https://geocode.xhamster.com/videos/xx-xxxxx-xxxxx-xxxx-xxxxx-x-xxx-xxxxxx-xxx-nnnnnnn
-REM // https://geocode.xhamster.com/embed/nnnnnnn
-REM Check if link is already embed, then skip to downloading since video clear link is on embed page
-IF EXIST "!SELFDropTemp!temp.mp4" (
-	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
-)
-IF EXIST "!SELFDropTemp!temp.html" (
-	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
-)
-IF "!URL2!"=="embed" (
-	ECHO.[!CurrentRealm!] Link type: [!URL2!]
-	SET "EmbedURL=!BuiltURL!"
-	SET "FileName=XHAMSTER-!URL3!"
-	GOTO :xhamster_DL_Webpage
-)
-REM Get video code
-ECHO.[!CurrentRealm!] Link type: [video]
-SET A=1
-FOR /L %%A IN (1,1,100) DO (
-	IF "!URL3:~%%A,1!"=="-" (
-		SET /A A+=1
-	)
-)
-FOR /F "tokens=%A%* delims=-" %%A IN ("!URL3!") DO (
-	SET "VideoID=%%A"
-)
-IF DEFINED VideoID (
-	ECHO.[!CurrentRealm!] Got VideoID.
-)
-SET "EmbedURL=https://!URL1!/embed/!VideoID!"
-:xhamster_DL_Webpage
-SET "CurrentRealm=xhamster"
-ECHO.[!CurrentRealm!] Downloading webpage...
-CALL :JavascriptDownload "!EmbedURL!" "!SELFDropTemp!temp.html"
-ECHO.[!CurrentRealm!] Parsing webpage...
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "standard^":{^"mp4^"" ') DO (
-	SET "SourceLine=%%A"
-)
-ECHO.[!CurrentRealm!] Getting download URL...
-SET "SourceLine=!SourceLine:~13!"
-SET "DownloadURL=!SourceLine:~0,-19!"
-SET "FileName=!URL3:~0,-5!"
-IF !CL_MakeMode! EQU 1 (
-	REM ECHO.!VideoTitle!
-	REM ECHO.!SourceLineLow!
-	ECHO.[!CurrentRealm!] !DownloadURL!
-	REM ECHO.!UploaderID!
-	REM ECHO.!ThumbnailMosaique!
-	REM ECHO.!Thumbnail!
-	PAUSE >NUL
-)
-EXIT /B
-
-
-::: ---
-
-
-
-:TODO
-
-:Realm_hclips
-
-:::Currently broken
-
-EXIT /B
-SET "CurrentRealm=hclips"
-TITLE b.dl - Downloading from hclips!CL_Codebase!
-REM // https://hclips.com/videos/nnnnnnn/beautiful-blonde-riding-xx-xxx-xxxx-xx-xxxxxxxxx/
-REM // https://hclips.com/embed/nnnnnnn/
-REM Check if link is already embed, then skip to downloading since video clear link is on embed page
-
-IF EXIST "!SELFDropTemp!temp.mp4" (
-	DEL /F /Q "!SELFDropTemp!temp.mp4" >NUL
-)
-IF EXIST "!SELFDropTemp!temp.html" (
-	DEL /F /Q "!SELFDropTemp!temp.html" >NUL
-)
-
-IF "!URL2!"=="embed" (
-	ECHO.[!CurrentRealm!] Link type: [!URL2!]
-	SET "EmbedURL=!BuiltURL!"
-	SET "FileName=HCLIPS-!URL3!"
-	GOTO :hclips_DL_Webpage
-)
-
-REM Get video code
-ECHO.[!CurrentRealm!] Link type: [video]
-SET "VideoID=!URL3!"
-SET "FileName=HCLIPS-!URL4!!URL3!"
-IF DEFINED VideoID (
-	ECHO.[!CurrentRealm!] Got VideoID.
-)
-SET "EmbedURL=https://!URL1!/embed/!VideoID!"
-:hclips_DL_Webpage
-SET "CurrentRealm=hclips"
-ECHO.[!CurrentRealm!] Downloading webpage...
-CALL :JavascriptDownload "!EmbedURL!" "!SELFDropTemp!temp.html"
-ECHO.[!CurrentRealm!] Parsing webpage...
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlLow" ') DO (
-	SET "SourceLineLow=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setVideoUrlHigh" ') DO (
-	SET "SourceLineHigh=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setUploaderName" ') DO (
-	SET "UploaderID=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbSlide" ') DO (
-	SET "ThumbnailMosaique=%%A"
-)
-FOR /F "delims=*" %%A IN ('TYPE !SELFDropTemp!temp.html ^| FIND "html5player.setThumbUrl" ') DO (
-	SET "Thumbnail=%%A"
-	GOTO :hclips_DL_ManageDownloadVars
-)
-
-:::Realm ideas to check out: imgur erome motherless porn.com redtube heavyr eporner shameless youjizz
-
-:TODO
-:DL_FLICKRSINGLEPIC
-SET "EmbedURL=https://www.flickr.com/services/oembed?url="
-SET "URL=!AAA!//!SERVICE!/!FIRST!/!SECOND!/!THIRD!/"
-IF NOT EXIST "%S1%\FlickLoad\" MKDIR "%S1%\FlickLoad\"
-
-IF NOT EXIST "%S2%\FlickLoad\" MKDIR "%S2%\FlickLoad\"
-WGET -q --no-verbose --no-check-certificate -O "%S1%\FlickLoad\temp.html" "!EmbedURL!!URL!" --user-agent="Mozilla/42.0"
-FOR /F "delims=^^<+^^> tokens=1,2,3,4,5" %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "type"') DO (
-        SET "FT=%%C"
-)
-IF NOT "!FT!"=="photo" (
-	ECHO.
-	ECHO.ATTENTION^^!^^!^^!
-	ECHO. -------------------
-	ECHO. Filetype ^>^>^>!FT!^<^<^< might not be supported.
-	ECHO. -------------------
-	ECHO.
-	PAUSE
-	REM CALL :DL_FLICKRSINGLEPIC.METHOD_B
-	EXIT /B
-)
-FOR /F "delims=^^<+^^> tokens=1,2,3,4,5" %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "title"') DO (
-        SET "FILENAME=%%C"
-		ECHO.FILENAME:!FILENAME!
-		GOTO :DL_FLICKRSINGLEPIC.B
-)
-:DL_FLICKRSINGLEPIC.B
-FOR /F "delims=^^<+^^> tokens=1,2,3,4,5" %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "author_name"') DO (
-        SET "AUTHORNAME=%%C"
-)
-IF EXIST "%S2%\FlickLoad\!AUTHORNAME!\!THIRD!.jpg" EXIT /B
-FOR /F "delims=^^<+^^> tokens=1,2,3,4,5" %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "author_url"') DO (
-        SET "AUTHORURL=%%C"
-)
-IF NOT EXIST "%S2%\FlickLoad\!AUTHORNAME!\" MKDIR "%S2%\FlickLoad\!AUTHORNAME!\"
-IF NOT EXIST "%S2%\FlickLoad\!AUTHORNAME!\page.txt" (
-	ECHO.bamd Flickload Module v.0.1 > "%S2%\FlickLoad\!AUTHORNAME!\page.txt"
-	ECHO.Author Name: !AUTHORNAME! >> "%S2%\FlickLoad\!AUTHORNAME!\page.txt"
-	ECHO.Author URL: !AUTHORURL! >> "%S2%\FlickLoad\!AUTHORNAME!\page.txt"
-	ECHO.>> "%S2%\FlickLoad\!AUTHORNAME!\page.txt"
-)
-ECHO.!Third!.jpg - !Filename! - !URL!>> "%S2%\FlickLoad\!AUTHORNAME!\page.txt"
-FOR /F "delims=^^<+^^> tokens=1,2,3,4,5 skip=1" %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "url"') DO (
-        SET "DLURL=%%C"
-		ECHO.DLURL:!DLURL!
-		GOTO :DL_FLICKRSINGLEPIC.C
-)
-:DL_FLICKRSINGLEPIC.C
-WGET -q --no-verbose --no-check-certificate -O "%S1%\FlickLoad\!Third!.jpg" "!DLURL!" --user-agent="Mozilla/42.0"
-MOVE "%S1%\FlickLoad\!Third!.jpg" "%S2%\FlickLoad\!AUTHORNAME!\" >NUL
-EXIT /B
-
-:DL_FLICKRSINGLEPIC.METHOD_B
-WGET -q --no-verbose --no-check-certificate -O "%S1%\FlickLoad\temp.html" "!URL!" --user-agent="Mozilla/42.0"
-FOR /F "delims={+: tokens=1,2,3,4,5,6,7,8," %%A IN ('TYPE %S1%\FlickLoad\temp.html ^| FIND "displayUrl"') DO (
-        SET "AUTHORURL=%%C"
-		ECHO.%%A
-		ECHO.%%B
-		ECHO.%%C
-		ECHO.%%D
-		ECHO.%%E
-		ECHO.%%F
-		ECHO.%%G
-		ECHO.%%H
-)
-PAUSE
-EXIT /B
-
 ::: /// :[DOWNLOAD MODULES END]: /// :::
